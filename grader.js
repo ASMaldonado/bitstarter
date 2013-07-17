@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!OA/usr/bin/env node
 /*
 Automatically grade files for the presence of specified HTML tags/attributes.
 Uses commander.js and cheerio. Teaches command line application development
@@ -22,10 +22,14 @@ References:
 */
 
 var fs = require('fs');
+var outfile = "graderReport.txt";
 var program = require('commander');
 var cheerio = require('cheerio');
+var rest = require('restler');
+
 var HTMLFILE_DEFAULT = "index.html";
 var CHECKSFILE_DEFAULT = "checks.json";
+var URL_DEFAULT = "http://salty-earth-9105.herokuapp.com/";
 
 var assertFileExists = function(infile) {
     var instr = infile.toString();
@@ -43,6 +47,21 @@ var cheerioHtmlFile = function(htmlfile) {
 var loadChecks = function(checksfile) {
     return JSON.parse(fs.readFileSync(checksfile));
 };
+
+/*
+var getResp = function(url){
+   var htmlPage = "";
+   rest.get(url).on('complete', function(response){
+   var htmlPage = response;
+   });
+   return htmlPage;
+};
+*/
+var checkUrlFile = function(urlfile, checksfile){
+//   var htmlPage = getResp(urlfile);
+  // checkHtmlFile(htmlPage, checksfile);  
+};
+
 
 var checkHtmlFile = function(htmlfile, checksfile) {
     $ = cheerioHtmlFile(htmlfile);
@@ -65,10 +84,16 @@ if(require.main == module) {
     program
         .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
         .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
+        .option('-h, --url <url_file>', 'URL to index.html', clone(assertFileExists), URL_DEFAULT)
         .parse(process.argv);
-    var checkJson = checkHtmlFile(program.file, program.checks);
-    var outJson = JSON.stringify(checkJson, null, 4);
-    console.log(outJson);
+    if(program.file) 
+       var checkJson = checkHtmlFile(program.file, program.checks);
+//    if(program.url)
+  //     var checkJson = checkUrlFile(program.url, program.checks);
+     
+     var outJson = JSON.stringify(checkJson, null, 4);
+     console.log(outJson);
+     fs.writeFileSync(outfile, outJson);
 } else {
     exports.checkHtmlFile = checkHtmlFile;
 }
